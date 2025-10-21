@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#0a0f16" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<title>Gestione Materiali — Glass (v1.4.6 Home pulita)</title>
+<title>Gestione Materiali — Glass (v1.4.7)</title>
 <style>
-  /* ===== Tema scuro vetro ===== */
+  /* ===== Tema scuro vetro (leggermente più chiaro) ===== */
   :root{
     --text:#f7faff;
     --muted:#d1d9ec;
@@ -17,21 +17,22 @@
     --bg1:#08101c; --bg2:#0a1730;
     --blobA:#2b65ff; --blobB:#0aa9b6; --blobC:#103b84; --blobD:#0f6a7a;
 
-    --panel: rgba(10,14,22,.82);
-    --panel-weak: rgba(10,14,22,.68);
-    --panel-border: rgba(255,255,255,.10);
-    --panel-border-strong: rgba(255,255,255,.16);
+    /* pannelli un filo più chiari */
+    --panel: rgba(18,24,36,.76);
+    --panel-weak: rgba(18,24,36,.58);
+    --panel-border: rgba(255,255,255,.12);
+    --panel-border-strong: rgba(255,255,255,.18);
 
-    /* Navigazione a contrasto alto */
-    --nav-bg: rgba(8,12,18,.96);
-    --nav-item: rgba(255,255,255,.06);
-    --nav-item-hover: rgba(255,255,255,.14);
-    --nav-item-activeA: rgba(127,176,255,.28);
-    --nav-item-activeB: rgba(10,169,182,.22);
-    --nav-border: rgba(255,255,255,.26);
-    --nav-border-strong: rgba(255,255,255,.36);
+    /* Navigazione a contrasto alto ma più luminosa */
+    --nav-bg: rgba(10,16,24,.94);
+    --nav-item: rgba(255,255,255,.08);
+    --nav-item-hover: rgba(255,255,255,.16);
+    --nav-item-activeA: rgba(127,176,255,.32);
+    --nav-item-activeB: rgba(10,169,182,.26);
+    --nav-border: rgba(255,255,255,.28);
+    --nav-border-strong: rgba(255,255,255,.38);
 
-    --radius:20px; --shadow:0 12px 40px rgba(0,0,0,.45);
+    --radius:20px; --shadow:0 12px 40px rgba(0,0,0,.42);
   }
 
   *{box-sizing:border-box}
@@ -42,7 +43,6 @@
     background: radial-gradient(1200px 900px at 20% 0%, var(--bg2) 0%, var(--bg1) 60%) fixed;
     position:relative; padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom);
   }
-  /* onde decorative */
   body::before, body::after{
     content:""; position:fixed; inset:-25% -20% auto -20%; height:140svh; pointer-events:none; z-index:-2;
     background:
@@ -54,11 +54,8 @@
   }
   body::after{ inset:auto -25% -15% -25%; transform:translateY(-10%); filter:blur(60px) saturate(140%); opacity:.5 }
 
-  /* Utility */
-  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
   .grow{flex:1} .mt-6{margin-top:6px} .mt-10{margin-top:10px} .mt-16{margin-top:16px}
 
-  /* Layout app */
   .app{display:grid;grid-template-rows:64px 1fr;min-height:100svh}
   header.appbar{
     position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;
@@ -69,11 +66,9 @@
   }
   .appmain{padding:22px clamp(12px,4vw,44px) 44px}
 
-  /* Solo la schermata attiva è visibile */
   .screen{display:none}
   .screen.active{display:block}
 
-  /* Effetto vetro */
   .glass{
     background: linear-gradient(160deg, var(--panel), var(--panel-weak));
     border:1px solid var(--panel-border);
@@ -82,7 +77,6 @@
     box-shadow: var(--shadow);
   }
 
-  /* AppBar */
   .hamburger{width:44px;height:44px;display:grid;place-items:center;border-radius:14px}
   .hamburger,.pill{ background: linear-gradient(160deg, rgba(255,255,255,.10), rgba(255,255,255,.05)); border:1px solid var(--panel-border); box-shadow: var(--shadow); }
   .hamburger .bars{display:grid;gap:4px}
@@ -90,7 +84,7 @@
   .brand{font-weight:900;letter-spacing:.3px}
   .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;font-size:13px;border-radius:14px}
 
-  /* Drawer (NAV) – contrasto aumentato */
+  /* Drawer (NAV) */
   .drawer{position:fixed;inset:0 auto 0 0;width:min(320px,86vw);transform:translateX(-100%);transition:.28s transform;z-index:1000}
   .drawer.open{transform:translateX(0)}
   .drawer-panel{
@@ -119,33 +113,28 @@
   .nav-bottom{margin-top:auto;border-top:1px dashed var(--nav-border-strong);padding-top:10px}
   .icon{width:20px;display:grid;place-items:center}
 
-  /* Card & testi */
-  .card{padding:18px;border-radius:var(--radius)}
-  .card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-  .card h2,.card h3{margin:0;font-weight:900;letter-spacing:.2px}
-
-  /* HOME pulita (solo ora e data) */
+  /* HOME pulita */
   .home-wrap{display:grid;gap:18px;max-width:1000px;margin:0 auto}
   .home-card{display:grid;gap:8px;place-items:center;text-align:center;padding:34px}
   .clock{font-size:clamp(60px,18vw,110px);font-weight:1000;line-height:1}
   .date{color:#f1f5ff}
 
-  /* Form */
+  /* Form + bottoni */
   form .grid{display:grid;gap:12px;grid-template-columns:repeat(12,1fr)}
   .field{display:grid;gap:8px}
   .field label{color:#f3f6ff;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
   .field input,.field textarea,.field select{
     width:100%;border-radius:14px;padding:12px 12px;color:#ffffff;border:1px solid var(--panel-border-strong);
-    background: linear-gradient(160deg, rgba(10,14,22,.86), rgba(10,14,22,.70));
+    background: linear-gradient(160deg, rgba(18,24,36,.86), rgba(18,24,36,.64));
     -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
   }
   .field input::placeholder,.field textarea::placeholder{color:#e5ebff}
   .actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:8px}
   .btn{
     border:1px solid var(--panel-border-strong);border-radius:14px;font-weight:800;font-size:16px;padding:12px 16px;color:var(--text);
-    background: linear-gradient(160deg, rgba(255,255,255,.10), rgba(255,255,255,.05)); box-shadow: var(--shadow);
+    background: linear-gradient(160deg, rgba(255,255,255,.12), rgba(255,255,255,.06)); box-shadow: var(--shadow);
   }
-  .btn.primary{background:linear-gradient(160deg, rgba(127,176,255,.35), rgba(10,169,182,.30))}
+  .btn.primary{background:linear-gradient(160deg, rgba(127,176,255,.38), rgba(10,169,182,.30))}
 
   /* Tabelle */
   .table{width:100%;border-collapse:collapse;font-size:14px}
@@ -154,7 +143,7 @@
     background: rgba(8,12,18,.92); color:#fff; border-bottom:1px solid var(--panel-border-strong);
   }
   .table td{padding:10px;border-bottom:1px dashed var(--panel-border);vertical-align:top}
-  .empty{padding:18px;text-align:center;color:#fff;border:1px dashed var(--panel-border-strong);border-radius:14px;background:rgba(8,12,18,.82)}
+  .empty{padding:18px;text-align:center;color:#fff;border:1px dashed var(--panel-border-strong);border-radius:14px;background:rgba(8,12,18,.78)}
 
   /* Responsive table come card */
   .rtable{width:100%}
@@ -163,7 +152,7 @@
     .rtable tbody,.rtable tr,.rtable td{display:block;width:100%}
     .rtable tr{
       margin-bottom:12px;border-radius:16px;
-      background: rgba(8,12,18,.86); border:1px solid var(--panel-border-strong); padding:10px; box-shadow: var(--shadow);
+      background: rgba(8,12,18,.84); border:1px solid var(--panel-border-strong); padding:10px; box-shadow: var(--shadow);
     }
     .rtable td{border:none;border-bottom:1px dashed var(--panel-border);padding:8px 6px}
     .rtable td:last-child{border-bottom:none}
@@ -172,9 +161,8 @@
     }
     .rtable td[data-actions]{text-align:right;padding-top:10px}
   }
-  .subrow td{background:rgba(8,12,18,.8);border-bottom:1px dashed var(--panel-border)}
+  .subrow td{background:rgba(8,12,18,.82);border-bottom:1px dashed var(--panel-border)}
 
-  /* Grid helper */
   .col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
   @media (max-width:840px){.col-8,.col-6,.col-4,.col-3{grid-column:span 12}}
 </style>
@@ -189,7 +177,7 @@
   </header>
 
   <main class="appmain">
-    <!-- HOME (solo orario e data) -->
+    <!-- HOME: solo ora e data -->
     <section id="screen-home" class="screen active">
       <div class="home-wrap">
         <div class="card glass home-card">
@@ -236,7 +224,14 @@
             <div class="field col-6"><label for="lNome">Nome lista</label><input id="lNome" required /></div>
             <div class="field col-6"><label for="lDesc">Descrizione (opz.)</label><input id="lDesc" /></div>
           </div>
-          <div class="grid mt-16"><div class="field col-12"><label for="lSearch">Cerca materiale</label><input id="lSearch" placeholder="Cerca per titolo/codice…" /></div></div>
+
+          <div class="grid mt-16">
+            <div class="field col-12">
+              <label for="lSearch">Cerca materiale (codice)</label>
+              <input id="lSearch" placeholder="Digita il codice… e premi Invio" />
+            </div>
+          </div>
+
           <div class="mt-10" id="searchResults"></div>
 
           <div class="mt-16">
@@ -312,7 +307,7 @@
 <div id="toast" class="pill" style="position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);opacity:0;transition:.25s;z-index:2000"></div>
 
 <script>
-  /* === Stato/Storage invariato === */
+  /* === Stato/Storage === */
   const TZ='Europe/Rome';
   const Store={ keyCodes:'gm_codes_v1', keyLists:'gm_lists_v1', keyName:'gm_username_v1',
     getCodes(){return JSON.parse(localStorage.getItem(this.keyCodes)||'[]')},
@@ -338,33 +333,26 @@
   const drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
   document.getElementById('btnMenu').addEventListener('click',()=>{drawer.classList.add('open');overlay.classList.add('show')});
   overlay.addEventListener('click',()=>{drawer.classList.remove('open');overlay.classList.remove('show')});
-
-  // click su voci del menu
   drawer.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{
-    goTo(b.getAttribute('data-go'));
-    drawer.classList.remove('open'); overlay.classList.remove('show');
+    goTo(b.getAttribute('data-go')); drawer.classList.remove('open'); overlay.classList.remove('show');
   }));
-
   function goTo(sel){
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     const t=document.querySelector(sel); if(t){t.classList.add('active');t.scrollTop=0;}
-
-    // evidenzia la voce attiva nel menu
     document.querySelectorAll('.navlink').forEach(n=>n.classList.remove('active'));
     const active = drawer.querySelector(`.navlink[data-go="${sel}"]`); if(active) active.classList.add('active');
-
     if(sel==='#screen-all-codes') renderCodesTable();
     if(sel==='#screen-add-list'){ renderSearchResults(); renderListBuilder(); }
     if(sel==='#screen-lists') renderListsTable();
     if(sel==='#screen-export') refreshExportLists();
   }
 
-  /* Clock (Home) + orologio AppBar */
+  /* Clock */
   const bigClock=document.getElementById('bigClock'), bigDate=document.getElementById('bigDate'), smallClock=document.getElementById('appClockSmall');
   function tick(){const n=new Date();bigClock.textContent=fmtTime(n);smallClock.textContent=new Intl.DateTimeFormat('it-IT',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:TZ}).format(n);bigDate.textContent=fmtDate(n)}
   setInterval(tick,1000); tick();
 
-  /* CODICI */
+  /* ===== CODICI ===== */
   const codeForm=document.getElementById('codeForm'), editBadge=document.getElementById('editBadge'), codeSavedMsg=document.getElementById('codeSavedMsg');
   const F={titolo:document.getElementById('cTitolo'),codice:document.getElementById('cCodice'),desc:document.getElementById('cDesc'),qty:document.getElementById('cQty'),unit:document.getElementById('cUnit'),extra:document.getElementById('cExtra')};
   let editingId=null;
@@ -382,35 +370,90 @@
     if(!editingId) fillCodeForm(null); editingId=null; document.getElementById('addCodeTitle').textContent='Aggiungi codice'; editBadge.style.display='none';
   });
 
-  /* LISTE */
+  /* ===== LISTE ===== */
   const lNome=document.getElementById('lNome'), lDesc=document.getElementById('lDesc'), lSearch=document.getElementById('lSearch');
   const searchResults=document.getElementById('searchResults'), listItemsArea=document.getElementById('listItemsArea'), listSavedMsg=document.getElementById('listSavedMsg');
   let builderItems=[], listEditingId=null;
+  let lastScanValue=''; // per evitare auto-aggiunte duplicate
 
-  lSearch.addEventListener('input',renderSearchResults);
-  document.getElementById('clearListBuilder').addEventListener('click',()=>{builderItems=[];renderListBuilder()});
+  document.getElementById('clearListBuilder').addEventListener('click',()=>{builderItems=[];renderListBuilder(); lSearch.focus()});
+
+  // aggiunge (o incrementa) per id codice
+  function addToBuilder(codeId, qty=1){
+    qty=Math.max(1,parseInt(qty||'1',10));
+    const ex=builderItems.find(x=>x.codeId===codeId);
+    if(ex){ex.qty+=qty}else{builderItems.push({codeId,qty})}
+    renderListBuilder();
+  }
+
+  // ENTER: se match esatto => aggiungi; altrimenti se c'è un solo risultato => aggiungi quello
+  lSearch.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){
+      e.preventDefault();
+      const q=(lSearch.value||'').trim().toLowerCase(); if(!q) return;
+      const codes=Store.getCodes();
+      const exact=codes.find(c=>(c.codice||'').toLowerCase()===q);
+      if(exact){ addToBuilder(exact.id,1); toast(`Aggiunto: ${exact.codice}`); lSearch.value=''; renderSearchResults(); return }
+      const filtered=codes.filter(c=>(c.codice||'').toLowerCase().includes(q));
+      if(filtered.length===1){ addToBuilder(filtered[0].id,1); toast(`Aggiunto: ${filtered[0].codice}`); lSearch.value=''; renderSearchResults(); }
+    }
+  });
+
+  // input: mostra risultati solo se si digita; auto-aggiunta se match esatto
+  lSearch.addEventListener('input',()=>{
+    const q=(lSearch.value||'').trim();
+    if(q && q.toLowerCase()!==lastScanValue){
+      const codes=Store.getCodes();
+      const exact=codes.find(c=>(c.codice||'').toLowerCase()===q.toLowerCase());
+      if(exact){
+        addToBuilder(exact.id,1);
+        toast(`Aggiunto automaticamente: ${exact.codice}`);
+        lastScanValue=q.toLowerCase();
+        lSearch.value='';
+      }
+    }
+    renderSearchResults();
+  });
 
   function renderSearchResults(){
-    const q=(lSearch.value||'').toLowerCase().trim();
+    const q=(lSearch.value||'').trim(); const ql=q.toLowerCase();
     const codes=Store.getCodes();
-    const filtered=q?codes.filter(c=>(c.titolo||'').toLowerCase().includes(q)||(c.codice||'').toLowerCase().includes(q)||(c.descrizione||'').toLowerCase().includes(q)):codes.slice(0,20);
-    if(!codes.length){searchResults.innerHTML=`<div class="empty">Non hai ancora inserito codici.</div>`;return}
-    if(!filtered.length){searchResults.innerHTML=`<div class="empty">Nessun risultato per <strong>${escapeHTML(q)}</strong>.</div>`;return}
+
+    if(!q){
+      searchResults.innerHTML=`<div class="empty">Digita un <strong>codice</strong> per cercare.</div>`;
+      return;
+    }
+
+    const filtered=codes.filter(c=>(c.codice||'').toLowerCase().includes(ql));
+    if(!filtered.length){
+      searchResults.innerHTML=`<div class="empty">Nessun materiale per il codice <strong>${escapeHTML(q)}</strong>.</div>`;
+      return;
+    }
+
     const rows=filtered.map(c=>`
       <tr>
-        <td data-label="Materiale"><strong>${escapeHTML(c.titolo)}</strong><div class="date">${escapeHTML(c.codice)}</div></td>
+        <td data-label="Codice"><strong>${escapeHTML(c.codice)}</strong></td>
+        <td data-label="Materiale"><div>${escapeHTML(c.titolo||'')}</div></td>
         <td data-label="Unità" class="date">${escapeHTML(c.unita||'')}</td>
-        <td data-label="Descrizione" class="date" title="${escapeHTML(c.descrizione||'')}">${escapeHTML((c.descrizione||'').slice(0,60))}${(c.descrizione||'').length>60?'…':''}</td>
         <td data-label="Azioni" data-actions style="text-align:right">
           <input type="number" min="1" step="1" value="1" style="width:80px;margin-right:6px" id="qty_${c.id}">
           <button class="btn" data-add="${c.id}">Aggiungi</button>
         </td>
       </tr>`).join('');
-    searchResults.innerHTML=`<div class="card glass"><div class="card-header"><h3>Risultati</h3><span class="date">${filtered.length} trovati</span></div><table class="table rtable"><thead><tr><th>Materiale</th><th>Unità</th><th>Descrizione</th><th style="text-align:right">Azioni</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+
+    searchResults.innerHTML=`<div class="card glass">
+      <div class="card-header"><h3>Risultati</h3><span class="date">${filtered.length} trovati</span></div>
+      <table class="table rtable">
+        <thead><tr><th>Codice</th><th>Materiale</th><th>Unità</th><th style="text-align:right">Azioni</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+
     searchResults.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{
       const id=b.getAttribute('data-add'); const qEl=document.getElementById(`qty_${id}`); const qty=Math.max(1,parseInt(qEl.value||'1',10));
-      const ex=builderItems.find(x=>x.codeId===id); if(ex){ex.qty+=qty}else{builderItems.push({codeId:id,qty})}
-      renderListBuilder(); toast('Aggiunto alla lista');
+      addToBuilder(id,qty);
+      toast('Aggiunto alla lista');
+      // resta su questa pagina; non cambiare sezione
     }));
   }
 
@@ -420,12 +463,13 @@
     const byId=Object.fromEntries(Store.getCodes().map(c=>[c.id,c]));
     const rows=builderItems.map(it=>{const c=byId[it.codeId]||{};return`
       <tr>
-        <td data-label="Materiale"><strong>${escapeHTML(c.titolo||'[eliminato]')}</strong><div class="date">${escapeHTML(c.codice||'')}</div></td>
+        <td data-label="Codice"><strong>${escapeHTML(c.codice||'[elim]')}</strong></td>
+        <td data-label="Materiale">${escapeHTML(c.titolo||'[eliminato]')}</td>
         <td data-label="Unità" class="date">${escapeHTML(c.unita||'')}</td>
         <td data-label="Quantità" style="width:140px"><input type="number" min="1" step="1" value="${it.qty}" style="width:100%" data-qty="${it.codeId}"></td>
         <td data-label="Azioni" data-actions style="text-align:right"><button class="btn" data-del="${it.codeId}">🗑️</button></td>
       </tr>`}).join('');
-    listItemsArea.innerHTML=`<table class="table rtable"><thead><tr><th>Materiale</th><th>Unità</th><th>Quantità</th><th style="text-align:right">Azioni</th></tr></thead><tbody>${rows}</tbody></table>`;
+    listItemsArea.innerHTML=`<table class="table rtable"><thead><tr><th>Codice</th><th>Materiale</th><th>Unità</th><th>Q.tà</th><th style="text-align:right">Azioni</th></tr></thead><tbody>${rows}</tbody></table>`;
     listItemsArea.querySelectorAll('[data-qty]').forEach(i=>i.addEventListener('change',()=>{const id=i.getAttribute('data-qty');const it=builderItems.find(x=>x.codeId===id);if(it){it.qty=Math.max(1,parseInt(i.value||'1',10))}}));
     listItemsArea.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{const id=b.getAttribute('data-del');builderItems=builderItems.filter(x=>x.codeId!==id);renderListBuilder()}));
   }
@@ -442,11 +486,14 @@
       all.push({id:uid(),nome,descrizione:lDesc.value.trim(),items:builderItems.map(x=>({codeId:x.codeId,qty:x.qty})),createdAt:Date.now()});
       toast('Lista salvata');
     }
-    Store.setLists(all); builderItems=[]; renderListBuilder(); listSavedMsg.style.display=''; lNome.value=''; lDesc.value=''; listEditingId=null; document.getElementById('editListBadge').style.display='none';
-    refreshExportLists(); goTo('#screen-lists'); renderListsTable();
+    Store.setLists(all);
+    // resta in "Aggiungi lista" finché non decidi tu di cambiare sezione:
+    builderItems=[]; renderListBuilder(); listSavedMsg.style.display=''; lNome.value=''; lDesc.value=''; listEditingId=null; document.getElementById('editListBadge').style.display='none';
+    refreshExportLists();
+    lSearch.focus();
   });
 
-  /* Tabelle codici */
+  /* ===== Tabelle codici ===== */
   const codesSearch=document.getElementById('codesSearch'), codesTableWrap=document.getElementById('codesTableWrap'), codesCount=document.getElementById('codesCount');
   function renderCodesTable(){
     const q=(codesSearch?.value||'').toLowerCase().trim();
@@ -473,7 +520,7 @@
   }
   codesSearch && codesSearch.addEventListener('input',renderCodesTable);
 
-  /* Tabelle liste */
+  /* ===== Liste salvate & Export ===== */
   const listsSearch=document.getElementById('listsSearch'), listsTableWrap=document.getElementById('listsTableWrap'), listsCount=document.getElementById('listsCount');
   function itemsCount(items){return items.reduce((a,b)=>a+(parseInt(b.qty||'0',10)||0),0)}
   function renderListsTable(){
@@ -566,7 +613,7 @@
   function sanitizeLists(arr){return arr.filter(x=>x&&typeof x==='object').map(x=>({id:x.id||uid(),nome:String(x.nome||''),descrizione:String(x.descrizione||''),items:Array.isArray(x.items)?x.items.map(it=>({codeId:String(it.codeId||''),qty:Math.max(1,parseInt(it.qty||'1',10))})):[],createdAt:Number.isFinite(+x.createdAt)?+x.createdAt:Date.now(),updatedAt:Number.isFinite(+x.updatedAt)?+x.updatedAt:undefined}))}
   function escapeHTML(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
 
-  // Avvio
+  // Init
   renderCodesTable(); renderSearchResults(); renderListBuilder(); refreshExportLists(); renderListsTable();
 </script>
 </body>
