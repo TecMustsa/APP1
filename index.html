@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1" />
+<meta name="theme-color" content="#0a0f16" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="format-detection" content="telephone=no" />
+<title>Gestione Materiali — Glass (v1.6.3 login-test)</title>
+<style>
+  :root{
+    --text:#f7faff; --muted:#d1d9ec; --accent:#7fb0ff;
+    --bg1:#08101c; --bg2:#0a1730;
+    --blobA:#2b65ff; --blobB:#0aa9b6; --blobC:#103b84; --blobD:#0f6a7a;
+
+    --panel: rgba(18,24,36,.76);
+    --panel-weak: rgba(18,24,36,.58);
+    --panel-border: rgba(255,255,255,.12);
+    --panel-border-strong: rgba(255,255,255,.18);
+
+    --nav-bg: rgba(10,16,24,.94);
+    --nav-item: rgba(255,255,255,.08);
+    --nav-item-hover: rgba(255,255,255,.16);
+    --nav-item-activeA: rgba(127,176,255,.32);
+    --nav-item-activeB: rgba(10,169,182,.26);
+    --nav-border: rgba(255,255,255,.28);
+    --nav-border-strong: rgba(255,255,255,.38);
+
+    --radius:20px; --shadow:0 12px 40px rgba(0,0,0,.42);
+
+    --page-pad: clamp(10px, 4vw, 32px);
+    --card-pad: clamp(14px, 2.2vw, 22px);
+
+    --fs-body: clamp(14px, 1.1vw, 16px);
+    --fs-small: clamp(12px, 0.95vw, 14px);
+    --fs-title: clamp(18px, 1.6vw, 22px);
+    --fs-btn: clamp(15px, 1.2vw, 16px);
+
+    --drawer-w: min(360px, 90vw);
+  }
+
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  body{
+    margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Noto Sans",Helvetica,Arial;
+    font-size: var(--fs-body); line-height:1.35;
+    color:var(--text);min-height:100svh;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;
+    touch-action:pan-y;overscroll-behavior-x:none;
+    background: radial-gradient(1200px 900px at 20% 0%, var(--bg2) 0%, var(--bg1) 60%) fixed;
+    position:relative;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
+  }
+  *{box-sizing:border-box;min-width:0}
+  img,svg,video,canvas{max-width:100%;height:auto}
+
+  /* sfondo decorativo */
+  body::before,body::after{
+    content:"";position:fixed;inset:-25% -20% auto -20%;height:140svh;pointer-events:none;z-index:-2;
+    background:
+      radial-gradient(40% 35% at 12% 18%, color-mix(in oklab,var(--blobB) 60%, #000 40%) 0%, transparent 70%),
+      radial-gradient(38% 33% at 90% 12%, color-mix(in oklab,var(--blobA) 62%, #000 38%) 0%, transparent 72%),
+      radial-gradient(50% 50% at 55% 90%, color-mix(in oklab,var(--blobD) 60%, #000 40%) 0%, transparent 68%),
+      radial-gradient(60% 50% at 0% 100%, color-mix(in oklab,var(--blobC) 58%, #000 42%) 0%, transparent 70%);
+    filter:blur(48px) saturate(120%);opacity:.8;
+  }
+  body::after{inset:auto -25% -15% -25%;transform:translateY(-10%);filter:blur(60px) saturate(140%);opacity:.5}
+
+  .grow{flex:1} .mt-6{margin-top:6px} .mt-10{margin-top:10px} .mt-16{margin-top:16px}
+
+  /* ===== LOGIN ===== */
+  #loginScreen{min-height:100svh;display:grid;place-items:center;padding:var(--page-pad)}
+  .login-card{
+    width:min(520px, 96vw);
+    padding:clamp(18px, 5.5vw, 32px);
+    text-align:center;
+  }
+  .login-title{font-size: clamp(22px, 2.4vw, 28px);font-weight:1000;margin:0 0 6px}
+  .login-sub{color:var(--muted);margin:0 0 16px}
+  .login-foot{color:var(--muted);font-size:var(--fs-small);margin-top:12px}
+  .login-fields{display:grid;gap:12px;margin-top:16px}
+  .login-fields label{display:block;text-align:left;color:#f3f6ff;font-size:var(--fs-small);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+  .login-fields input{
+    width:100%;border-radius:14px;padding:12px 12px;color:#fff;border:1px solid var(--panel-border-strong);
+    background:linear-gradient(160deg,rgba(18,24,36,.86),rgba(18,24,36,.64));
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    font-size:16px;min-height:44px;
+  }
+
+  .btn{
+    border:1px solid var(--panel-border-strong);border-radius:14px;font-weight:800;font-size:var(--fs-btn);
+    padding: clamp(10px, 1.2vw, 12px) clamp(14px, 2vw, 18px); color:var(--text);
+    background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.06)); box-shadow:var(--shadow);
+    min-height:44px; cursor:pointer;
+  }
+  .btn.primary{background:linear-gradient(160deg,rgba(127,176,255,.38),rgba(10,169,182,.30))}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;font-size:var(--fs-small);border-radius:14px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.05));border:1px solid var(--panel-border);box-shadow:var(--shadow)}
+  .glass{background:linear-gradient(160deg,var(--panel),var(--panel-weak));border:1px solid var(--panel-border);border-radius:var(--radius);-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%);box-shadow:var(--shadow)}
+
+  /* ===== APP ===== */
+  .app{display:none;grid-template-rows:auto 1fr;min-height:100svh}
+  header.appbar{
+    position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;
+    padding: calc(8px + env(safe-area-inset-top)) var(--page-pad) 10px;
+    background:linear-gradient(180deg, rgba(8,15,22,.85), rgba(8,15,22,.55));
+    -webkit-backdrop-filter:blur(10px) saturate(160%);backdrop-filter:blur(10px) saturate(160%);
+    border-bottom:1px solid var(--panel-border-strong);
+  }
+  .brand{font-weight:900;letter-spacing:.3px;font-size: clamp(16px, 1.4vw, 20px)}
+  .hamburger{width:44px;height:44px;display:grid;place-items:center;border-radius:14px}
+  .hamburger .bars{display:grid;gap:4px}.hamburger .bars span{width:18px;height:2px;background:#eff3ff;border-radius:2px}
+
+  .appmain{padding: 18px var(--page-pad) 36px; max-width: 1200px; margin-inline:auto}
+  .screen{display:none}.screen.active{display:block}
+
+  .title{font-size:var(--fs-small);text-transform:uppercase;letter-spacing:.14em;color:#fff;margin:6px 8px 2px;opacity:.95}
+  .icon{width:20px;display:grid;place-items:center}
+
+  /* Drawer */
+  .drawer{position:fixed;inset:0 auto 0 0;width:var(--drawer-w);transform:translateX(-105%);transition:.28s transform;z-index:1000;contain:layout paint}
+  .drawer.open{transform:translateX(0)}
+  .drawer-panel{
+    height:100%;padding:calc(14px + env(safe-area-inset-top)) 14px 14px;display:flex;flex-direction:column;gap:10px;
+    background:linear-gradient(180deg,var(--nav-bg),rgba(8,12,18,.92));border-right:1px solid var(--nav-border);
+    -webkit-backdrop-filter:blur(10px) saturate(180%);backdrop-filter:blur(10px) saturate(180%)
+  }
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s;z-index:900}
+  .overlay.show{opacity:1;pointer-events:auto}
+  .navlink{display:flex;align-items:center;gap:10px;padding:14px 12px;border-radius:14px;color:#fff;background:var(--nav-item);border:1px solid var(--nav-border);font-weight:700}
+  .navlink:hover{background:var(--nav-item-hover);border-color:var(--nav-border-strong)}
+  .navlink.active{background:linear-gradient(160deg,var(--nav-item-activeA),var(--nav-item-activeB));border-color:rgba(127,176,255,.55)}
+  .nav-bottom{margin-top:auto;border-top:1px dashed var(--nav-border-strong);padding-top:10px}
+
+  .home-wrap{display:grid;place-items:center;max-width:1000px;margin:0 auto}
+  .home-card{width:min(680px,100%);padding: clamp(18px, 6vw, 34px);display:grid;gap:8px;place-items:center;text-align:center}
+  .clock{font-size: clamp(48px, 14vw, 96px);font-weight:1000;line-height:1}
+  .date{color:#f1f5ff;font-size: clamp(14px, 1.2vw, 16px)}
+
+  .card{padding:var(--card-pad);border-radius:var(--radius);max-width:100%}
+  .card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .card h2,.card h3{margin:0;font-weight:900;letter-spacing:.2px;font-size:var(--fs-title)}
+
+  form .grid{display:grid;gap:12px;grid-template-columns:repeat(12,1fr)}
+  .field{display:grid;gap:8px}
+  .field label{color:#f3f6ff;font-size:var(--fs-small);letter-spacing:.06em;text-transform:uppercase}
+  .field input,.field textarea,.field select{
+    width:100%;border-radius:14px;padding:12px 12px;color:#fff;border:1px solid var(--panel-border-strong);
+    background:linear-gradient(160deg,rgba(18,24,36,.86),rgba(18,24,36,.64));
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    font-size:16px;min-height:44px;
+  }
+  .field textarea{min-height:96px}
+  .field input::placeholder,.field textarea::placeholder{color:#e5ebff}
+
+  .actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:8px}
+  .btn.primary{background:linear-gradient(160deg,rgba(127,176,255,.38),rgba(10,169,182,.30))}
+
+  .table{width:100%;border-collapse:collapse;font-size: clamp(13px, 1vw, 14px)}
+  .table thead th{position:sticky;top:0;text-align:left;padding:10px;background:rgba(8,12,18,.92);color:#fff;border-bottom:1px solid var(--panel-border-strong)}
+  .table td{padding:10px;border-bottom:1px dashed var(--panel-border);vertical-align:top}
+  .empty{padding:18px;text-align:center;color:#fff;border:1px dashed var(--panel-border-strong);border-radius:14px;background:rgba(8,12,18,.78)}
+
+  /* Tabelle responsive su telefono */
+  .rtable{width:100%}
+  @media (max-width:720px){
+    .rtable thead{display:none}
+    .rtable tbody,.rtable tr,.rtable td{display:block;width:100%}
+    .rtable tr{margin-bottom:12px;border-radius:16px;background:rgba(8,12,18,.84);border:1px solid var(--panel-border-strong);padding:10px;box-shadow:var(--shadow)}
+    .rtable td{border:none;border-bottom:1px dashed var(--panel-border);padding:8px 6px}
+    .rtable td:last-child{border-bottom:none}
+    .rtable td[data-label]::before{content:attr(data-label) " ";font-weight:800;color:#fff;margin-right:8px;display:inline-block;min-width:110px}
+    .rtable td[data-actions]{text-align:right;padding-top:10px}
+  }
+  .subrow td{background:rgba(8,12,18,.82);border-bottom:1px dashed var(--panel-border)}
+
+  .col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
+  @media (max-width:840px){.col-8,.col-6,.col-4,.col-3{grid-column:span 12}}
+
+  @media (max-width:480px){
+    :root{ --radius:16px; --drawer-w: min(92vw, 380px); }
+    .appmain{padding: 14px var(--page-pad) 28px}
+    .home-card{padding: clamp(16px, 5.5vw, 24px)}
+    .brand{font-size: clamp(16px, 4.5vw, 18px)}
+  }
+  @media (min-width:481px) and (max-width:1024px){
+    :root{ --drawer-w: min(420px, 70vw); }
+    .home-card{width:min(820px,100%);}
+    .clock{font-size: clamp(56px, 10vw, 108px)}
+  }
+  @media (min-width:1200px){
+    .appmain{max-width: 1220px}
+  }
+
+  /* Toast */
+  #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);opacity:0;transition:.25s;z-index:2000}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<section id="loginScreen">
+  <div class="login-card glass">
+    <div class="pill" style="justify-content:center">Gestione Materiali · Glass</div>
+    <h1 class="login-title">Accesso</h1>
+    <p class="login-sub">Inserisci <strong>nome utente</strong> e <strong>password</strong>.</p>
+    <form id="loginForm" autocomplete="on" novalidate>
+      <div class="login-fields">
+        <div>
+          <label for="loginUser">Nome utente</label>
+          <input id="loginUser" name="username" autocomplete="username" placeholder="es. admin" required />
+        </div>
+        <div>
+          <label for="loginPass">Password</label>
+          <input id="loginPass" name="current-password" type="password" autocomplete="current-password" placeholder="••••••" required />
+        </div>
+      </div>
+      <div class="actions mt-16" style="justify-content:center">
+        <button class="btn primary" type="submit" id="loginBtn">Entra</button>
+      </div>
+    </form>
+    <p class="login-foot">Demo: <code>admin / admin</code> oppure <code>admin1 / admin</code></p>
+  </div>
+</section>
+
+<!-- ===== APP ===== -->
+<div class="app" id="appRoot" aria-hidden="true">
+  <header class="appbar">
+    <button id="btnMenu" class="hamburger glass" aria-label="Apri menu"><span class="bars"><span></span><span></span><span></span></span></button>
+    <div class="brand">Gestione Materiali · Glass</div>
+    <div class="grow"></div>
+    <div class="pill">🕘 <span id="appClockSmall">--:--</span></div>
+  </header>
+
+  <main class="appmain">
+    <!-- HOME -->
+    <section id="screen-home" class="screen active" aria-live="polite">
+      <div class="home-wrap">
+        <div class="card glass home-card">
+          <div class="clock" id="bigClock">--:--:--</div>
+          <div class="date" id="bigDate">— —</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AGGIUNGI CODICE -->
+    <section id="screen-add-code" class="screen">
+      <div class="card glass">
+        <div class="card-header">
+          <h2 id="addCodeTitle">Aggiungi codice</h2>
+          <span class="pill" id="editBadge" style="display:none">Modalità modifica</span>
+        </div>
+        <form id="codeForm">
+          <div class="grid">
+            <div class="field col-6"><label for="cTitolo">Titolo</label><input id="cTitolo" required /></div>
+            <div class="field col-6"><label for="cCodice">Codice</label><input id="cCodice" required autocapitalize="characters" /></div>
+            <div class="field col-12"><label for="cDesc">Descrizione</label><textarea id="cDesc" placeholder="Dettagli, note tecniche…"></textarea></div>
+            <div class="field col-12"><label for="cExtra">Note (opz.)</label><input id="cExtra" placeholder="Note aggiuntive…" /></div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn" id="resetCodeForm">Annulla</button>
+            <button type="submit" class="btn primary" id="saveCodeBtn">Salva codice</button>
+          </div>
+          <div class="mt-10 date" id="codeSavedMsg" style="display:none">✅ Codice salvato.</div>
+        </form>
+      </div>
+    </section>
+
+    <!-- AGGIUNGI LISTA -->
+    <section id="screen-add-list" class="screen">
+      <div class="card glass">
+        <div class="card-header">
+          <h2 id="addListTitle">Aggiungi lista</h2>
+          <span class="pill" id="editListBadge" style="display:none">Modifica lista</span>
+        </div>
+        <form id="listForm">
+          <div class="grid">
+            <div class="field col-6"><label for="lNome">Nome lista</label><input id="lNome" required /></div>
+            <div class="field col-6"><label for="lDesc">Descrizione (opz.)</label><input id="lDesc" /></div>
+          </div>
+
+          <div class="grid mt-16">
+            <div class="field col-12">
+              <label for="lSearch">Cerca materiale (codice)</label>
+              <input id="lSearch" placeholder="Digita il codice… (Invio per aggiungere)" />
+            </div>
+          </div>
+
+          <div class="mt-10" id="searchResults"></div>
+
+          <div class="mt-16">
+            <h3>Elenco della lista</h3>
+            <div id="listItemsArea" class="mt-6 empty">Ancora nessun materiale aggiunto.</div>
+          </div>
+
+          <div class="actions mt-16">
+            <button type="button" class="btn" id="clearListBuilder">Svuota</button>
+            <button type="submit" class="btn primary">Salva lista</button>
+          </div>
+          <div class="mt-10 date" id="listSavedMsg" style="display:none">✅ Lista salvata.</div>
+        </form>
+      </div>
+    </section>
+
+    <!-- TUTTI I CODICI -->
+    <section id="screen-all-codes" class="screen">
+      <div class="card glass">
+        <div class="card-header"><h2 id="allCodesTitle">Tutti i codici</h2><div class="actions"><button class="btn" data-go="#screen-add-code">➕ Nuovo</button></div></div>
+        <div class="grid">
+          <div class="field col-8"><label for="codesSearch">Filtra</label><input id="codesSearch" placeholder="Digita per filtrare…" /></div>
+          <div class="field col-4"><label>&nbsp;</label><div class="pill">📦 <span id="codesCount">0</span> elementi</div></div>
+        </div>
+        <div class="mt-10" id="codesTableWrap"><div class="empty">Non ci sono codici.</div></div>
+      </div>
+    </section>
+
+    <!-- LISTE -->
+    <section id="screen-lists" class="screen">
+      <div class="card glass">
+        <div class="card-header"><h2 id="listsTitle">Liste</h2><div class="actions"><button class="btn" data-go="#screen-add-list">➕ Nuova lista</button></div></div>
+        <div class="grid">
+          <div class="field col-8"><label for="listsSearch">Filtra</label><input id="listsSearch" placeholder="Cerca per nome o descrizione…" /></div>
+          <div class="field col-4"><label>&nbsp;</label><div class="pill">🗂️ <span id="listsCount">0</span> liste</div></div>
+        </div>
+        <div class="mt-10" id="listsTableWrap"><div class="empty">Non ci sono ancora liste salvate.</div></div>
+      </div>
+    </section>
+
+    <!-- ESPORTAZIONE -->
+    <section id="screen-export" class="screen">
+      <div class="card glass">
+        <div class="card-header">
+          <h2 id="exportTitle">Esportazione</h2>
+          <div class="actions">
+            <button class="btn" id="backHome">← Torna Home</button>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="field col-12"><label for="listSelectExport">Seleziona una lista</label><select id="listSelectExport" class="glass" style="padding:10px"></select></div>
+        </div>
+        <div class="actions mt-10">
+          <button class="btn primary" id="btnExportPDF">🧾 Esporta lista in PDF</button>
+          <button class="btn" id="btnExportJSON">⬇️ Esporta JSON</button>
+          <label class="btn" for="fileImportJSON" style="display:inline-block">⬆️ Importa JSON</label>
+          <input id="fileImportJSON" type="file" accept=".json,application/json" style="display:none" />
+          <button class="btn danger" id="btnWipeAll">🗑️ Cancella TUTTO (local)</button>
+        </div>
+        <p class="date mt-10">I dati sono salvati <strong>solo</strong> nel tuo browser.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Drawer e overlay -->
+  <div class="drawer" id="drawer" role="dialog" aria-label="Menu">
+    <div class="drawer-panel">
+      <div class="title">Navigazione</div>
+      <button class="navlink" data-go="#screen-home"><span class="icon">🏠</span>Home</button>
+      <button class="navlink" data-go="#screen-add-code"><span class="icon">➕</span>Aggiungi codice</button>
+      <button class="navlink" data-go="#screen-add-list"><span class="icon">📝</span>Aggiungi lista</button>
+      <button class="navlink" data-go="#screen-all-codes"><span class="icon">📚</span>Tutti i codici</button>
+      <button class="navlink" data-go="#screen-lists"><span class="icon">🗂️</span>Liste</button>
+      <div class="nav-bottom">
+        <button class="navlink" data-go="#screen-export"><span class="icon">⤴️</span>Esportazione</button>
+        <button class="navlink" id="logoutBtn"><span class="icon">🚪</span>Esci</button>
+      </div>
+    </div>
+  </div>
+  <div class="overlay" id="overlay" aria-hidden="true"></div>
+</div>
+
+<div id="toast" class="pill" style="left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);opacity:0;transition:.25s;z-index:2000"></div>
+
+<script>
+  /* ===== Safe LocalStorage wrapper (gestisce Safari/Privato) ===== */
+  const SafeLS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},remove(k){try{localStorage.removeItem(k)}catch(e){}}};
+
+  /* ===== Stato/Utility ===== */
+  const TZ='Europe/Rome';
+  const Store={ keyCodes:'gm_codes_v1', keyLists:'gm_lists_v1', keyName:'gm_username_v1',
+    getCodes(){try{return JSON.parse(SafeLS.get(this.keyCodes)||'[]')}catch(e){return []}},
+    setCodes(a){SafeLS.set(this.keyCodes,JSON.stringify(a))},
+    getLists(){try{return JSON.parse(SafeLS.get(this.keyLists)||'[]')}catch(e){return []}},
+    setLists(a){SafeLS.set(this.keyLists,JSON.stringify(a))},
+    getName(){return SafeLS.get(this.keyName)||''},
+    setName(v){SafeLS.set(this.keyName,v)} };
+  const AUTH={ key:'gm_logged_v1', users:[{u:'admin',p:'admin'},{u:'admin1',p:'admin'}] };
+  const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
+  const fmtDate=d=>new Intl.DateTimeFormat('it-IT',{dateStyle:'full',timeZone:TZ}).format(d);
+  const fmtTime=d=>new Intl.DateTimeFormat('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZone:TZ}).format(d);
+  function toast(msg,ok=true){const t=document.getElementById('toast');t.textContent=msg;t.style.background=ok?'linear-gradient(160deg,rgba(26,180,109,.85),rgba(26,180,109,.65))':'linear-gradient(160deg,rgba(255,122,122,.9),rgba(255,122,122,.7))';t.style.color=ok?'#07140e':'#2b0f0f';t.style.opacity=1;t.style.transform='translateX(-50%) translateY(0)';setTimeout(()=>{t.style.opacity=0;t.style.transform='translateX(-50%) translateY(20px)'},2000)}
+
+  /* ===== Login / App toggle ===== */
+  const loginScreen=document.getElementById('loginScreen');
+  const appRoot=document.getElementById('appRoot');
+  function showLogin(){ loginScreen.hidden=false; loginScreen.style.display='grid'; appRoot.hidden=true; appRoot.style.display='none'; appRoot.setAttribute('aria-hidden','true'); document.body.scrollTop=0; document.documentElement.scrollTop=0;}
+  function showApp(){ loginScreen.hidden=true; loginScreen.style.display='none'; appRoot.hidden=false; appRoot.style.display='grid'; appRoot.removeAttribute('aria-hidden'); document.body.scrollTop=0; document.documentElement.scrollTop=0;}
+
+  const loginForm=document.getElementById('loginForm');
+  const inpUser=document.getElementById('loginUser');
+  const inpPass=document.getElementById('loginPass');
+
+  function validate(u,p){
+    const lu=(u||'').trim().toLowerCase();
+    const lp=(p||'').trim().toLowerCase();
+    return AUTH.users.some(x=>x.u===lu && x.p===lp);
+  }
+
+  loginForm.addEventListener('submit',e=>{
+    e.preventDefault();
+    const u=inpUser.value, p=inpPass.value;
+    if(validate(u,p)){
+      SafeLS.set(AUTH.key,'1'); // non blocca se storage off
+      Store.setName((u||'').trim().toLowerCase());
+      showApp();
+      goTo('#screen-home'); // forza Home
+      toast('Accesso effettuato');
+    }else{
+      toast('Credenziali non valide',false);
+      inpPass.select();
+    }
+  });
+
+  // Stato iniziale (prova anche su ritorno da background)
+  if(SafeLS.get(AUTH.key)==='1'){ showApp(); } else { showLogin(); }
+  window.addEventListener('pageshow',()=>{ if(SafeLS.get(AUTH.key)==='1'){ showApp(); goTo('#screen-home'); } else { showLogin(); } });
+
+  /* ===== Clock ===== */
+  const bigClock=document.getElementById('bigClock'), bigDate=document.getElementById('bigDate'), smallClock=document.getElementById('appClockSmall');
+  function tick(){const n=new Date();bigClock.textContent=fmtTime(n);smallClock.textContent=new Intl.DateTimeFormat('it-IT',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:TZ}).format(n);bigDate.textContent=fmtDate(n)}
+  setInterval(tick,1000); tick();
+
+  /* ===== Drawer + Navigazione ===== */
+  const drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
+  const btnMenu=document.getElementById('btnMenu');
+  btnMenu.addEventListener('click',()=>{drawer.classList.add('open');overlay.classList.add('show')});
+  overlay.addEventListener('click',()=>{drawer.classList.remove('open');overlay.classList.remove('show')});
+
+  function goTo(sel){
+    if(SafeLS.get(AUTH.key)!=='1'){ showLogin(); return; } // safety
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    const t=document.querySelector(sel); if(t){t.classList.add('active');t.scrollTop=0;}
+    document.querySelectorAll('.navlink').forEach(n=>n.classList.remove('active'));
+    const active = drawer.querySelector(`.navlink[data-go="${sel}"]`); if(active) active.classList.add('active');
+    if(sel==='#screen-all-codes') renderCodesTable();
+    if(sel==='#screen-add-list'){ renderSearchResults(); renderListBuilder(); }
+    if(sel==='#screen-lists') renderListsTable();
+    if(sel==='#screen-export') refreshExportLists();
+  }
+
+  drawer.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{
+    goTo(b.getAttribute('data-go')); drawer.classList.remove('open'); overlay.classList.remove('show');
+  }));
+  document.getElementById('backHome').addEventListener('click',()=>goTo('#screen-home'));
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', ()=>{
+    SafeLS.remove(AUTH.key);
+    toast('Disconnesso');
+    showLogin();
+    inpUser.focus();
+  });
+
+  /* ====== CODICI ====== */
+  const codeForm=document.getElementById('codeForm'), editBadge=document.getElementById('editBadge'), codeSavedMsg=document.getElementById('codeSavedMsg');
+  const F={titolo:document.getElementById('cTitolo'),codice:document.getElementById('cCodice'),desc:document.getElementById('cDesc'),extra:document.getElementById('cExtra')};
+  let editingId=null;
+  function fillCodeForm(it){F.titolo.value=it?.titolo||'';F.codice.value=it?.codice||'';F.desc.value=it?.descrizione||'';F.extra.value=it?.extra||''}
+  function resetCodeForm(){editingId=null;document.getElementById('addCodeTitle').textContent='Aggiungi codice';editBadge.style.display='none';fillCodeForm(null);codeSavedMsg.style.display='none'}
+  document.getElementById('resetCodeForm').addEventListener('click',resetCodeForm);
+
+  codeForm.addEventListener('submit',e=>{
+    e.preventDefault();
+    const data={titolo:F.titolo.value.trim(),codice:F.codice.value.trim(),descrizione:F.desc.value.trim(),extra:F.extra.value.trim()};
+    if(!data.titolo||!data.codice){toast('Titolo e Codice sono obbligatori',false);return}
+    let all=Store.getCodes();
+    const dup=all.some(x=>(editingId?x.id!==editingId:true)&& (x.codice||'').toLowerCase()===data.codice.toLowerCase());
+    if(dup){toast('Codice già presente',false);return}
+    if(editingId){all=all.map(x=>x.id===editingId?{...x,...data,updatedAt:Date.now()}:x)}
+    else {all.push({id:uid(),createdAt:Date.now(),quantita:0,unita:'',...data})}
+    Store.setCodes(all); codeSavedMsg.style.display=''; toast(editingId?'Codice aggiornato':'Codice salvato'); renderCodesTable();
+    if(!editingId) fillCodeForm(null); editingId=null; document.getElementById('addCodeTitle').textContent='Aggiungi codice'; editBadge.style.display='none';
+  });
+
+  /* ====== LISTE ====== */
+  const lNome=document.getElementById('lNome'), lDesc=document.getElementById('lDesc'), lSearch=document.getElementById('lSearch');
+  const searchResults=document.getElementById('searchResults'), listItemsArea=document.getElementById('listItemsArea'), listSavedMsg=document.getElementById('listSavedMsg');
+  let builderItems=[], listEditingId=null; let lastScanValue='';
+  document.getElementById('clearListBuilder').addEventListener('click',()=>{builderItems=[];renderListBuilder(); lSearch.focus()});
+  function addToBuilder(codeId, qty=1){qty=Math.max(1,parseInt(qty||'1',10));const ex=builderItems.find(x=>x.codeId===codeId); if(ex){ex.qty+=qty}else{builderItems.push({codeId,qty})} renderListBuilder()}
+  lSearch.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();const q=(lSearch.value||'').trim().toLowerCase();if(!q)return;const codes=Store.getCodes();
+      const exact=codes.find(c=>(c.codice||'').toLowerCase()===q); if(exact){addToBuilder(exact.id,1);toast(`Aggiunto: ${exact.codice}`);lSearch.value='';renderSearchResults();return}
+      const filtered=codes.filter(c=>(c.codice||'').toLowerCase().includes(q)); if(filtered.length===1){addToBuilder(filtered[0].id,1);toast(`Aggiunto: ${filtered[0].codice}`);lSearch.value='';renderSearchResults();}
+    }
+  });
+  lSearch.addEventListener('input',()=>{
+    const q=(lSearch.value||'').trim();
+    if(q && q.toLowerCase()!==lastScanValue){
+      const codes=Store.getCodes();
+      const exact=codes.find(c=>(c.codice||'').toLowerCase()===q.toLowerCase());
+      if(exact){addToBuilder(exact.id,1);toast(`Aggiunto automaticamente: ${exact.codice}`);lastScanValue=q.toLowerCase();lSearch.value='';}
+    }
+    renderSearchResults();
+  });
+  function renderSearchResults(){
+    const q=(lSearch.value||'').trim(); const ql=q.toLowerCase(); const codes=Store.getCodes();
+    if(!q){searchResults.innerHTML=`<div class="empty">Digita un <strong>codice</strong> per cercare.</div>`;return}
+    const filtered=codes.filter(c=>(c.codice||'').toLowerCase().includes(ql));
+    if(!filtered.length){searchResults.innerHTML=`<div class="empty">Nessun materiale per il codice <strong>${escapeHTML(q)}</strong>.</div>`;return}
+    const rows=filtered.map(c=>`
+      <tr>
+        <td data-label="Codice"><strong>${escapeHTML(c.codice)}</strong></td>
+        <td data-label="Materiale"><div>${escapeHTML(c.titolo||'')}</div></td>
+        <td data-label="Unità" class="date">${escapeHTML(c.unita||'')}</td>
+        <td data-label="Azioni" data-actions style="text-align:right">
+          <input type="number" min="1" step="1" value="1" style="width:80px;margin-right:6px" id="qty_${c.id}">
+          <button class="btn" data-add="${c.id}">Aggiungi</button>
+        </td>
+      </tr>`).join('');
+    searchResults.innerHTML=`<div class="card glass">
+      <div class="card-header"><h3>Risultati</h3><span class="date">${filtered.length} trovati</span></div>
+      <table class="table rtable">
+        <thead><tr><th>Codice</th><th>Materiale</th><th>Unità</th><th style="text-align:right">Azioni</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+    searchResults.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{
+      const id=b.getAttribute('data-add'); const qEl=document.getElementById(`qty_${id}`); const qty=Math.max(1,parseInt(qEl.value||'1',10));
+      addToBuilder(id,qty); toast('Aggiunto alla lista');
+    }));
+  }
+  function renderListBuilder(){
+    if(!builderItems.length){listItemsArea.className='mt-6 empty';listItemsArea.innerHTML='Ancora nessun materiale aggiunto.';return}
+    listItemsArea.className='mt-6 card glass';
+    const byId=Object.fromEntries(Store.getCodes().map(c=>[c.id,c]));
+    const rows=builderItems.map(it=>{const c=byId[it.codeId]||{};return`
+      <tr>
+        <td data-label="Codice"><strong>${escapeHTML(c.codice||'[elim]')}</strong></td>
+        <td data-label="Materiale">${escapeHTML(c.titolo||'[eliminato]')}</td>
+        <td data-label="Unità" class="date">${escapeHTML(c.unita||'')}</td>
+        <td data-label="Quantità" style="width:140px"><input type="number" min="1" step="1" value="${it.qty}" style="width:100%" data-qty="${it.codeId}"></td>
+        <td data-label="Azioni" data-actions style="text-align:right"><button class="btn" data-del="${it.codeId}">🗑️</button></td>
+      </tr>`}).join('');
+    listItemsArea.innerHTML=`<table class="table rtable"><thead><tr><th>Codice</th><th>Materiale</th><th>Unità</th><th>Q.tà</th><th style="text-align:right">Azioni</th></tr></thead><tbody>${rows}</tbody></table>`;
+    listItemsArea.querySelectorAll('[data-qty]').forEach(i=>i.addEventListener('change',()=>{const id=i.getAttribute('data-qty');const it=builderItems.find(x=>x.codeId===id);if(it){it.qty=Math.max(1,parseInt(i.value||'1',10))}}));
+    listItemsArea.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{const id=b.getAttribute('data-del');builderItems=builderItems.filter(x=>x.codeId!==id);renderListBuilder()}));
+  }
+  document.getElementById('listForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    const nome=lNome.value.trim(); if(!nome){toast('Nome lista obbligatorio',false);return}
+    if(builderItems.length===0){toast('Aggiungi almeno un materiale',false);return}
+    let all=Store.getLists();
+    if(listEditingId){all=all.map(l=>l.id===listEditingId?{...l,nome,descrizione:lDesc.value.trim(),items:builderItems.map(x=>({codeId:x.codeId,qty:x.qty})),updatedAt:Date.now()}:l);toast('Lista aggiornata')}
+    else {all.push({id:uid(),nome,descrizione:lDesc.value.trim(),items:builderItems.map(x=>({codeId:x.codeId,qty:x.qty})),createdAt:Date.now()});toast('Lista salvata')}
+    Store.setLists(all); builderItems=[]; renderListBuilder(); listSavedMsg.style.display=''; lNome.value=''; lDesc.value=''; listEditingId=null; document.getElementById('editListBadge').style.display='none'; refreshExportLists(); lSearch.focus();
+  });
+
+  /* ====== Tabelle Codici ====== */
+  const codesSearch=document.getElementById('codesSearch'), codesTableWrap=document.getElementById('codesTableWrap'), codesCount=document.getElementById('codesCount');
+  function renderCodesTable(){
+    const q=(codesSearch?.value||'').toLowerCase().trim();
+    const codes=Store.getCodes().sort((a,b)=>(a.titolo||'').localeCompare(b.titolo||'')); codesCount.textContent=codes.length;
+    const list=q?codes.filter(c=>(c.titolo||'').toLowerCase().includes(q)||(c.codice||'').toLowerCase().includes(q)||(c.descrizione||'').toLowerCase().includes(q)):codes;
+    if(!list.length){codesTableWrap.innerHTML=`<div class="empty">Nessun elemento${q?` per "<strong>${escapeHTML(q)}</strong>"`:''}.</div>`;return}
+    const rows=list.map(c=>`
+      <tr>
+        <td data-label="Elemento"><strong>${escapeHTML(c.titolo)}</strong><div class="date">${escapeHTML(c.codice)}</div></td>
+        <td data-label="Q.tà">${escapeHTML(c.quantita??0)}</td>
+        <td data-label="Unità">${escapeHTML(c.unita||'')}</td>
+        <td data-label="Descrizione" class="date" title="${escapeHTML(c.descrizione||'')}">${escapeHTML((c.descrizione||'').slice(0,60))}${(c.descrizione||'').length>60?'…':''}</td>
+        <td data-label="Data" class="date">${c.updatedAt?'mod. '+new Date(c.updatedAt).toLocaleDateString('it-IT'):new Date(c.createdAt).toLocaleDateString('it-IT')}</td>
+        <td data-label="Azioni" data-actions style="text-align:right;white-space:nowrap">
+          <button class="btn" data-edit="${c.id}">Modifica</button>
+          <button class="btn" data-dup="${c.id}">Duplica</button>
+          <button class="btn" data-del="${c.id}">🗑️</button>
+        </td>
+      </tr>`).join('');
+    codesTableWrap.innerHTML=`<div class="card glass"><table class="table rtable"><thead><tr><th>Elemento</th><th>Q.tà</th><th>Unità</th><th>Descrizione</th><th>Data</th><th style="text-align:right">Azioni</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    codesTableWrap.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>{const id=b.getAttribute('data-edit');const it=Store.getCodes().find(x=>x.id===id);if(!it)return;fillCodeForm(it);editingId=id;document.getElementById('addCodeTitle').textContent='Modifica codice';editBadge.style.display='';goTo('#screen-add-code')}));
+    codesTableWrap.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{const id=b.getAttribute('data-del');if(!confirm('Eliminare questo codice?'))return;Store.setCodes(Store.getCodes().filter(x=>x.id!==id));toast('Codice eliminato');renderCodesTable()}));
+    codesTableWrap.querySelectorAll('[data-dup]').forEach(b=>b.addEventListener('click',()=>{const id=b.getAttribute('data-dup');const c=Store.getCodes().find(x=>x.id===id);if(!c)return;const cp={...c,id:uid(),codice:c.codice+'-COPY',createdAt:Date.now(),updatedAt:undefined};const all=Store.getCodes();all.push(cp);Store.setCodes(all);toast('Duplicato creato');renderCodesTable()}));
+  }
+  codesSearch && codesSearch.addEventListener('input',renderCodesTable);
+
+  /* ====== Liste salvate & Export ====== */
+  const listsSearch=document.getElementById('listsSearch'), listsTableWrap=document.getElementById('listsTableWrap'), listsCount=document.getElementById('listsCount');
+  function itemsCount(items){return items.reduce((a,b)=>a+(parseInt(b.qty||'0',10)||0),0)}
+  function renderListsTable(){
+    const q=(listsSearch?.value||'').toLowerCase().trim();
+    const lists=Store.getLists().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')); listsCount.textContent=lists.length;
+    const filtered=q?lists.filter(l=>(l.nome||'').toLowerCase().includes(q)||(l.descrizione||'').toLowerCase().includes(q)):lists;
+    if(!filtered.length){listsTableWrap.innerHTML=`<div class="empty">Nessuna lista${q?` per "<strong>${escapeHTML(q)}</strong>"`:''}.</div>`;return}
+    const codes=Object.fromEntries(Store.getCodes().map(c=>[c.id,c]));
+    const rows=filtered.map(l=>{
+      const det=(l.items||[]).map((it,i)=>{const c=codes[it.codeId]||{};return`<tr>
+        <td data-label="#">${i+1}</td>
+        <td data-label="Materiale"><strong>${escapeHTML(c.titolo||'[eliminato]')}</strong><div class="date">${escapeHTML(c.codice||'')}</div></td>
+        <td data-label="Unità">${escapeHTML(c.unita||'')}</td>
+        <td data-label="Q.tà" style="text-align:right">${it.qty}</td>
+        <td data-label="Descrizione" class="date">${escapeHTML((c.descrizione||'').slice(0,120))}${(c.descrizione||'').length>120?'…':''}</td>
+      </tr>`}).join('');
+      const meta=l.updatedAt?('mod. '+new Date(l.updatedAt).toLocaleDateString('it-IT')):new Date(l.createdAt).toLocaleDateString('it-IT');
+      return `<tbody data-list="${l.id}">
+        <tr>
+          <td data-label="Dettagli" style="width:36px"><button class="btn" data-toggle="${l.id}">▼</button></td>
+          <td data-label="Lista"><strong>${escapeHTML(l.nome)}</strong><div class="date">${escapeHTML(l.descrizione||'')}</div></td>
+          <td data-label="Righe">${(l.items||[]).length}</td>
+          <td data-label="Pezzi">${itemsCount(l.items||[])}</td>
+          <td data-label="Data" class="date">${meta}</td>
+          <td data-label="Azioni" data-actions style="text-align:right;white-space:nowrap">
+            <button class="btn" data-edit-list="${l.id}">Modifica</button>
+            <button class="btn" data-del-list="${l.id}">🗑️</button>
+          </td>
+        </tr>
+        <tr class="subrow" id="sub_${l.id}" style="display:none">
+          <td></td><td colspan="5">
+            <table class="table rtable"><thead><tr><th>#</th><th>Materiale</th><th>Unità</th><th style="text-align:right">Q.tà</th><th>Descrizione</th></tr></thead><tbody>${det||'<tr><td colspan="5" class="date">Nessun elemento</td></tr>'}</tbody></table>
+          </td>
+        </tr>
+      </tbody>`}).join('');
+    listsTableWrap.innerHTML=`<div class="card glass"><table class="table rtable"><thead><tr><th></th><th>Lista</th><th>Righe</th><th>Pezzi</th><th>Data</th><th style="text-align:right">Azioni</th></tr></thead>${rows}</table></div>`;
+    listsTableWrap.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',()=>{const id=b.getAttribute('data-toggle');const r=document.getElementById(`sub_${id}`);if(r){r.style.display=r.style.display==='none'?'':'none'}}));
+    listsTableWrap.querySelectorAll('[data-del-list]').forEach(b=>b.addEventListener('click',()=>{const id=b.getAttribute('data-del-list');if(!confirm('Eliminare questa lista?'))return;Store.setLists(Store.getLists().filter(l=>l.id!==id));toast('Lista eliminata');renderListsTable();refreshExportLists()}));
+    listsTableWrap.querySelectorAll('[data-edit-list]').forEach(b=>b.addEventListener('click',()=>{const id=b.getAttribute('data-edit-list');const l=Store.getLists().find(x=>x.id===id);if(!l)return;document.getElementById('lNome').value=l.nome||'';document.getElementById('lDesc').value=l.descrizione||'';builderItems=(l.items||[]).map(it=>({codeId:String(it.codeId||''),qty:Math.max(1,parseInt(it.qty||'1',10))}));listEditingId=l.id;document.getElementById('editListBadge').style.display='';renderListBuilder();goTo('#screen-add-list')}));
+  }
+  listsSearch && listsSearch.addEventListener('input',renderListsTable);
+
+  /* ===== Export / Import ===== */
+  const listSelectExport=document.getElementById('listSelectExport');
+  const btnExportPDF=document.getElementById('btnExportPDF');
+  const btnExportJSON=document.getElementById('btnExportJSON');
+  const fileImportJSON=document.getElementById('fileImportJSON');
+  const btnWipeAll=document.getElementById('btnWipeAll');
+
+  function refreshExportLists(){
+    const lists=Store.getLists().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')); 
+    listSelectExport.innerHTML=lists.length?lists.map(l=>`<option value="${l.id}">${escapeHTML(l.nome)}</option>`).join(''):`<option value="">(Nessuna lista)</option>`;
+  }
+  refreshExportLists();
+
+  btnExportJSON.addEventListener('click',()=>{
+    const payload={exportedAt:new Date().toISOString(),app:'Gestione Materiali Glass',name:Store.getName(),codes:Store.getCodes(),lists:Store.getLists()};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);
+    const a=Object.assign(document.createElement('a'),{href:url,download:`gestione-materiali_${Date.now()}.json`});document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);toast('JSON esportato');
+  });
+
+  btnExportPDF.addEventListener('click',async ()=>{
+    const listId=listSelectExport.value; const lists=Store.getLists(); const l=lists.find(x=>x.id===listId);
+    if(!l){toast('Seleziona una lista',false);return}
+    const codes=Object.fromEntries(Store.getCodes().map(c=>[c.id,c]));
+    const fileName=`lista_${sanitizeFileName(l.nome||'senza-nome')}.pdf`;
+    const blob=makeListPDFBlob(l,codes);
+    try{
+      if('canShare' in navigator && navigator.canShare && navigator.canShare({files:[new File([blob], fileName, {type:'application/pdf'})]})){
+        await navigator.share({files:[new File([blob], fileName, {type:'application/pdf'})], title:l.nome, text:'Lista materiali'});
+        toast('Condiviso');
+      }else{
+        const url=URL.createObjectURL(blob);
+        const a=Object.assign(document.createElement('a'),{href=url,download=fileName});
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        toast('PDF scaricato');
+      }
+    }catch(e){ console.error(e); toast('Impossibile condividere, scarico il PDF…'); 
+      const url=URL.createObjectURL(blob); const a=Object.assign(document.createElement('a'),{href=url,download,fileName}); document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+  });
+
+  btnWipeAll.addEventListener('click',()=>{if(!confirm('Eliminare TUTTI i dati locali?')) return; SafeLS.remove(Store.keyCodes); SafeLS.remove(Store.keyLists); renderCodesTable(); refreshExportLists(); renderListsTable(); toast('Archivio svuotato')});
+
+  /* ==== PDF generator ==== */
+  function makeListPDFBlob(list,codesById){
+    const title=`Lista: ${list.nome||''}`;
+    const dateStr=new Date().toLocaleString('it-IT',{timeZone:TZ});
+    const user=Store.getName()||'';
+    const items=(list.items||[]).map((it,i)=>{
+      const c=codesById[it.codeId]||{};
+      return { i:i+1, titolo:c.titolo||'[eliminato]', codice:c.codice||'', unita:c.unita||'', qty: String(it.qty||0), descr:(c.descrizione||'') };
+    });
+
+    const PDF_W=595, PDF_H=842, LM=40, TM=48, BM=40;
+    const lineH=16;
+    const colX={idx:LM, mat:LM+22, unita:LM+340, qty:LM+400, codice:LM+460};
+    const pages=[]; let y=PDF_H-TM;
+    function escPDF(s){return String(s||'').replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)')}
+    function addLine(x,y,text,size){return `BT /F1 ${size} Tf 1 0 0 1 ${x} ${y} Tm (${escPDF(text)}) Tj ET\n`}
+    function newPage(){
+      y=PDF_H-TM; let content='';
+      content+=addLine(LM,y, title, 18); y-=lineH;
+      if(list.descrizione){content+=addLine(LM,y, `Note: ${list.descrizione}`, 11); y-=lineH;}
+      content+=addLine(LM,y, `Tecnico: ${user || '-' } · Data: ${dateStr}`, 11); y-=lineH*1.2;
+      content+=addLine(colX.idx,y,'#',12);
+      content+=addLine(colX.mat,y,'Materiale',12);
+      content+=addLine(colX.unita,y,'Unità',12);
+      content+=addLine(colX.qty,y,'Q.tà',12);
+      content+=addLine(colX.codice,y,'Codice',12);
+      y-=lineH;
+      pages.push(content);
+    }
+    newPage();
+    function addWrapped(x, size, text, maxChars){
+      const chunks=[]; const s=String(text||''); const step=Math.max(1,maxChars||70);
+      for(let i=0;i<s.length;i+=step) chunks.push(s.slice(i,i+step));
+      for(const ch of chunks){ pages[pages.length-1]+=addLine(x,y,ch,size); y-=lineH; if(y<BM){ newPage(); } }
+    }
+    for(const row of items){
+      if(y< (BM+lineH*3)) newPage();
+      pages[pages.length-1]+=addLine(colX.idx,y,String(row.i),11);
+      addWrapped(colX.mat,11, row.titolo, 52);
+      const topY=y+lineH;
+      pages[pages.length-1]+=addLine(colX.unita,topY,row.unita,11);
+      pages[pages.length-1]+=addLine(colX.qty,topY,row.qty,11);
+      pages[pages.length-1]+=addLine(colX.codice,topY,row.codice,11);
+      if(row.descr){ addWrapped(colX.mat,10, `— ${row.descr}`, 70); }
+      y-=4;
+      if(y<BM) newPage();
+    }
+    const objects=[];
+    objects.push(`4 0 obj<< /Type/Font /Subtype/Type1 /BaseFont/Helvetica >>endobj\n`);
+    const contentIds=[];
+    for(const p of pages){
+      const stream=`${p}`; const len=stream.length;
+      contentIds.push(objects.length+1);
+      objects.push(`${objects.length+1} 0 obj<< /Length ${len} >>stream\n${stream}endstream endobj\n`);
+    }
+    const pageIds=[];
+    for(let i=0;i<pages.length;i++){
+      const pid=objects.length+1; pageIds.push(pid);
+      objects.push(`${pid} 0 obj<< /Type/Page /Parent 2 0 R /MediaBox [0 0 ${PDF_W} ${PDF_H}] /Resources << /Font << /F1 4 0 R >> >> /Contents ${contentIds[i]} 0 R >>endobj\n`);
+    }
+    const kids=pageIds.map(id=>`${id} 0 R`).join(' ');
+    objects.push(`2 0 obj<< /Type/Pages /Kids [${kids}] /Count ${pageIds.length} >>endobj\n`);
+    objects.push(`1 0 obj<< /Type/Catalog /Pages 2 0 R >>endobj\n`);
+    let pdf='%PDF-1.4\n'; const offsets=[]; for(const obj of objects){offsets.push(pdf.length); pdf+=obj}
+    const xrefStart=pdf.length;
+    pdf+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`;
+    for(const off of offsets){ pdf+=String(off).padStart(10,'0')+' 00000 n \n' }
+    pdf+=`trailer<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+    return new Blob([pdf],{type:'application/pdf'});
+  }
+
+  function sanitizeFileName(s){return String(s||'').replace(/[^a-z0-9_\-]+/gi,'_').replace(/_+/g,'_').replace(/^_+|_+$/g,'').slice(0,60)||'file'}
+  function escapeHTML(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+
+  /* ===== Init ===== */
+  ;(function init(){
+    if(SafeLS.get(AUTH.key)==='1'){ showApp(); goTo('#screen-home'); }
+    else { showLogin(); }
+    // Rendering non blocca se storage non disponibile
+    try{ renderCodesTable(); renderSearchResults(); renderListBuilder(); refreshExportLists(); renderListsTable(); }catch(e){}
+  })();
+
+  /* Placeholder (definite sopra) per ordine in alcuni engine */
+  function renderCodesTable(){}
+  function renderListsTable(){}
+  function renderSearchResults(){}
+  function renderListBuilder(){}
+  function refreshExportLists(){}
+</script>
+</body>
+</html>
