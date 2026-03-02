@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magazzino Cantiere</title>
+
+<style>
+*{box-sizing:border-box;}
+
+body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    background:linear-gradient(145deg,#0e0e11,#1a1a20);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#eaeaea;
+}
+
+.glass{
+    width:95%;
+    max-width:550px;
+    max-height:95vh;
+    overflow:auto;
+    padding:30px;
+    border-radius:28px;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(40px) saturate(120%);
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow:
+        0 25px 60px rgba(0,0,0,0.8),
+        inset 0 0 40px rgba(255,255,255,0.03);
+}
+
+h2,h3{
+    text-align:center;
+    font-weight:500;
+    letter-spacing:1px;
+}
+
+input{
+    width:100%;
+    padding:15px;
+    margin-top:15px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.06);
+    color:#fff;
+    font-size:16px;
+    outline:none;
+}
+
+input::placeholder{
+    color:#888;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:15px;
+    border-radius:18px;
+    font-size:15px;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,0.15);
+    background:rgba(255,255,255,0.08);
+    color:#fff;
+    transition:0.2s ease;
+}
+
+button:hover{
+    background:rgba(255,255,255,0.18);
+}
+
+.btn-primary{
+    background:rgba(255,255,255,0.15);
+    font-weight:600;
+}
+
+.btn-secondary{
+    background:rgba(255,255,255,0.07);
+}
+
+.btn-danger{
+    background:rgba(90,90,90,0.2);
+    border:1px solid rgba(255,255,255,0.25);
+}
+
+.lista-container{
+    margin-top:25px;
+    padding:15px;
+    border-radius:20px;
+    background:rgba(0,0,0,0.25);
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.lista-title{
+    font-size:14px;
+    letter-spacing:1px;
+    opacity:0.7;
+    margin-bottom:10px;
+}
+
+.materiale{
+    padding:14px;
+    border-radius:16px;
+    margin-bottom:10px;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.08);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.codice{
+    font-weight:500;
+}
+
+.qta{
+    font-size:14px;
+    opacity:0.8;
+}
+
+.azioni button{
+    width:auto;
+    padding:6px 10px;
+    margin-left:6px;
+    font-size:13px;
+    border-radius:12px;
+}
+
+.fileInput{display:none;}
+</style>
+</head>
+
+<body>
+
+<div class="glass">
+    <h2>Magazzino Cantiere</h2>
+
+    <div id="step1">
+        <input type="text" id="cantiereInput" placeholder="RIFERIMENTO CANTIERE">
+        <button class="btn-primary" onclick="impostaCantiere()">Continua</button>
+    </div>
+
+    <div id="step2" style="display:none;">
+        <h3 id="titolo"></h3>
+
+        <input type="text" id="codiceInput" placeholder="CODICE materiale">
+        <button class="btn-primary" onclick="aggiungiNuovo()">Aggiungi Nuovo</button>
+
+        <div class="lista-container">
+            <div class="lista-title">LISTA MATERIALI</div>
+            <div id="lista"></div>
+        </div>
+
+        <button class="btn-secondary" onclick="esporta()">Esporta Lista</button>
+        <button class="btn-secondary" onclick="document.getElementById('fileImport').click()">Importa Lista</button>
+        <input type="file" id="fileImport" class="fileInput" accept=".txt" onchange="importa(event)">
+        <button class="btn-danger" onclick="eliminaCantiere()">Elimina Cantiere</button>
+    </div>
+</div>
+
+<script>
+
+let riferimento="";
+let materiali={};
+
+window.onload=function(){
+    if(localStorage.getItem("riferimento")){
+        riferimento=localStorage.getItem("riferimento");
+        materiali=JSON.parse(localStorage.getItem("materiali"))||{};
+        mostra();
+    }
+};
+
+function impostaCantiere(){
+    riferimento=document.getElementById("cantiereInput").value.trim();
+    if(!riferimento)return;
+    localStorage.setItem("riferimento",riferimento);
+    materiali={};
+    salva();
+    mostra();
+}
+
+function mostra(){
+    document.getElementById("step1").style.display="none";
+    document.getElementById("step2").style.display="block";
+    document.getElementById("titolo").innerText="Cantiere: "+riferimento;
+    aggiorna();
+}
+
+/* SOLO NUMERI */
+function chiediQuantita(msg){
+    let q=prompt(msg);
+    if(q===null)return null;
+    if(!/^\d+$/.test(q)){
+        alert("Inserisci solo numeri.");
+        return chiediQuantita(msg);
+    }
+    return parseInt(q);
+}
+
+document.getElementById("codiceInput").addEventListener("blur",function(){
+    let codice=this.value.trim();
+    if(materiali[codice]){
+        let q=chiediQuantita("Codice già presente. Quantità da aggiungere:");
+        if(q!==null){
+            materiali[codice]+=q;
+            salva();
+            aggiorna();
+            this.value="";
+        }
+    }
+});
+
+function aggiungiNuovo(){
+    let codice=document.getElementById("codiceInput").value.trim();
+    if(!codice)return;
+
+    if(materiali[codice]){
+        alert("Codice già presente.");
+        return;
+    }
+
+    let q=chiediQuantita("Inserisci quantità:");
+    if(q!==null){
+        materiali[codice]=q;
+        salva();
+        aggiorna();
+        document.getElementById("codiceInput").value="";
+    }
+}
+
+function aggiorna(){
+    let lista=document.getElementById("lista");
+    lista.innerHTML="";
+
+    for(let codice in materiali){
+        let div=document.createElement("div");
+        div.className="materiale";
+        div.innerHTML=`
+            <div>
+                <div class="codice">${codice}</div>
+                <div class="qta">Quantità: ${materiali[codice]}</div>
+            </div>
+            <div class="azioni">
+                <button onclick="modifica('${codice}',1)">+</button>
+                <button onclick="modifica('${codice}',-1)">-</button>
+                <button onclick="elimina('${codice}')">X</button>
+            </div>
+        `;
+        lista.appendChild(div);
+    }
+}
+
+function modifica(codice,val){
+    materiali[codice]+=val;
+    if(materiali[codice]<=0)delete materiali[codice];
+    salva();
+    aggiorna();
+}
+
+function elimina(codice){
+    delete materiali[codice];
+    salva();
+    aggiorna();
+}
+
+function salva(){
+    localStorage.setItem("materiali",JSON.stringify(materiali));
+}
+
+function esporta(){
+    let testo="RIFERIMENTO CANTIERE: "+riferimento+"\n\n";
+    for(let codice in materiali){
+        testo+=codice+" - Quantità: "+materiali[codice]+"\n";
+    }
+
+    let blob=new Blob([testo],{type:"text/plain"});
+    let link=document.createElement("a");
+    link.href=URL.createObjectURL(blob);
+    link.download=riferimento+".txt";
+    link.click();
+}
+
+function importa(event){
+    let file=event.target.files[0];
+    if(!file)return;
+
+    let reader=new FileReader();
+    reader.onload=function(e){
+        let righe=e.target.result.split("\n");
+        materiali={};
+
+        righe.forEach(r=>{
+            if(r.includes(" - Quantità: ")){
+                let parts=r.split(" - Quantità: ");
+                materiali[parts[0]]=parseInt(parts[1]);
+            }
+        });
+
+        salva();
+        aggiorna();
+    };
+    reader.readAsText(file);
+}
+
+/* QUI È LA MODIFICA IMPORTANTE */
+function eliminaCantiere(){
+    if(confirm("Eliminare completamente il cantiere?")){
+        riferimento="";
+        materiali={};
+        localStorage.removeItem("riferimento");
+        localStorage.removeItem("materiali");
+
+        document.getElementById("step2").style.display="none";
+        document.getElementById("step1").style.display="block";
+        document.getElementById("cantiereInput").value="";
+        document.getElementById("lista").innerHTML="";
+    }
+}
+
+</script>
+
+</body>
+</html>
